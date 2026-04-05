@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mausam Agro-Vet Centre | Professional Livestock Care</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Mukta:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #059669; /* Emerald 600 */
+            --primary-dark: #064e3b;
+            --alert-red: #dc2626; /* Red 600 */
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Mukta', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        }
+
+        .white-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        #mobileMenu, #protocolModal, #confirmModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #mobileMenu.open, #protocolModal.open, #confirmModal.open { display: flex; }
+
+        #sliderImage { transition: opacity 0.8s ease-in-out; }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .floating-wa { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        input, select, textarea {
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+            color: var(--text-main) !important;
+            padding: 1rem !important;
+            border-radius: 0.75rem !important;
+            width: 100%;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary) !important; outline: none; background: white !important; }
+
+        .lang-btn {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 99px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-6 shadow-2xl text-center">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 mb-2">Redirect to WhatsApp?</h3>
+            <p class="text-slate-500 mb-8">We will open WhatsApp to send your booking details directly to our vet.</p>
+            <div class="flex gap-4">
+                <button onclick="closeConfirm()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Cancel</button>
+                <button id="finalSubmitBtn" class="flex-1 py-3 btn-primary font-bold rounded-xl">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Protocol Modal -->
+    <div id="protocolModal" class="py-10 px-6 overflow-y-auto">
+        <div class="max-w-2xl w-full bg-white rounded-3xl p-8 shadow-2xl relative border border-slate-100 mx-auto">
+            <button onclick="closeProtocol()" class="absolute top-6 right-6 text-2xl text-slate-400 hover:text-red-500 transition-colors"><i class="fas fa-times"></i></button>
+            <div id="protocolContent"></div>
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <button onclick="closeProtocol()" class="w-full py-4 btn-primary rounded-xl font-bold" data-t="btnClose">Close Protocol</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div id="mobileMenu" class="flex-col gap-8 bg-white overflow-hidden">
+        <button onclick="toggleMobileMenu()" class="absolute top-8 right-8 text-3xl text-slate-800"><i class="fas fa-times"></i></button>
+        <a href="#home" onclick="toggleMobileMenu()" class="text-2xl font-bold text-slate-800" data-t="navHome">Home</a>
+        <a href="#diseases" onclick="toggleMobileMenu()" class="text-2xl font-bold text-slate-800" data-t="navDiseases">Disease Alerts</a>
+        <a href="#booking" onclick="toggleMobileMenu()" class="text-2xl font-bold text-slate-800" data-t="navBooking">Booking</a>
+        <a href="#services" onclick="toggleMobileMenu()" class="text-2xl font-bold text-slate-800" data-t="navServices">Services</a>
+        <button onclick="toggleLanguage(); toggleMobileMenu();" class="text-xl font-bold text-emerald-600 border-2 border-emerald-600 px-6 py-2 rounded-full">
+            <span id="langLabelMobile">नेपालीमा</span>
+        </button>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-hand-holding-medical text-emerald-600 text-3xl"></i>
+                <span class="font-extrabold text-xl tracking-tight text-slate-900 uppercase">Mausam <span class="text-emerald-600">Agro-Vet</span></span>
+            </div>
+            
+            <div class="hidden lg:flex items-center gap-8 font-semibold text-sm text-slate-600">
+                <a href="#home" class="hover:text-emerald-600 transition" data-t="navHome">Home</a>
+                <a href="#diseases" class="hover:text-emerald-600 transition" data-t="navDiseases">Alerts</a>
+                <a href="#booking" class="hover:text-emerald-600 transition" data-t="navBooking">Booking</a>
+                <a href="#services" class="hover:text-emerald-600 transition" data-t="navServices">Services</a>
+                <button onclick="toggleLanguage()" class="lang-btn">
+                    <i class="fas fa-globe text-emerald-600"></i>
+                    <span id="langLabel" class="text-[10px] font-black uppercase tracking-tighter">नेपाली</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="tel:+9779816440951" class="hidden sm:flex btn-primary px-6 py-2.5 rounded-full font-bold items-center gap-2 text-sm">
+                    <i class="fas fa-phone-alt"></i> <span data-t="btnCall">Call Now</span>
+                </a>
+                <button class="lg:hidden text-slate-800 text-2xl" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient min-h-screen flex items-center pt-20 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center w-full relative">
+            <div class="text-white space-y-8 z-10 text-center lg:text-left">
+                <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase" data-t="heroBadge">
+                    Veterinary Excellence in Nepal
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.1]">
+                    <span data-t="heroTitle1">Advanced Care for</span><br>
+                    <span class="text-emerald-400" data-t="heroTitle2">Modern Farming</span>
+                </h1>
+                <p class="text-emerald-50/80 text-lg max-w-lg mx-auto lg:mx-0 leading-relaxed" data-t="heroSubtext">
+                    Providing top-tier clinical services for your livestock. From rapid disease diagnosis to surgical care, we ensure your farm stays productive.
+                </p>
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
+                    <button onclick="document.getElementById('booking').scrollIntoView()" class="bg-white text-emerald-900 px-10 py-5 rounded-2xl font-bold hover:bg-emerald-50 transition-all shadow-xl text-lg" data-t="btnBooking">
+                        Book Appointment
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative hidden lg:block">
+                <div class="relative z-10 rounded-[2.5rem] overflow-hidden border-[12px] border-white/10 shadow-2xl">
+                    <img id="sliderImage" src="https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&q=80&w=1000" class="w-full h-[550px] object-cover">
+                </div>
+                <div class="absolute -bottom-6 -left-6 bg-white p-8 rounded-3xl shadow-2xl border border-slate-100 z-20">
+                    <p class="text-emerald-600 text-4xl font-black">15+</p>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest" data-t="heroExp">Years Excellence</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Disease Section -->
+    <section id="diseases" class="py-24 px-6 bg-slate-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black text-slate-900 mb-2"><span data-t="disSection1">Emergency</span> <span class="text-red-600" data-t="disSection2">Disease Alerts</span></h2>
+                <p class="text-slate-500" data-t="disSubtext">Active monitoring for Rupandehi and Lumbini province.</p>
+            </div>
+            <div id="diseaseGrid" class="grid md:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 px-6 bg-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight mb-4" data-t="servTitle1">Our Specialized Services</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+                <div class="white-card p-8 group">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all"><i class="fas fa-stethoscope"></i></div>
+                    <h4 class="font-bold text-slate-800" data-t="serv1">Clinical Care</h4>
+                </div>
+                <div class="white-card p-8 group">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all"><i class="fas fa-microscope"></i></div>
+                    <h4 class="font-bold text-slate-800" data-t="serv4">Lab Diagnosis</h4>
+                </div>
+                <div class="white-card p-8 group">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all"><i class="fas fa-pills"></i></div>
+                    <h4 class="font-bold text-slate-800" data-t="serv3">Vet Pharmacy</h4>
+                </div>
+                <div class="white-card p-8 group">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all"><i class="fas fa-syringe"></i></div>
+                    <h4 class="font-bold text-slate-800" data-t="serv2">Vaccination</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Form Section -->
+    <section id="booking" class="py-24 px-6 bg-slate-50">
+        <div class="max-w-4xl mx-auto bg-white rounded-[2.5rem] shadow-2xl p-8 sm:p-16 border border-slate-100">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black text-slate-900 mb-4"><span data-t="bookTitle1">Schedule</span> <span class="text-emerald-600" data-t="bookTitle2">Consultation</span></h2>
+                <p class="text-slate-500" data-t="bookSubtext">Fill the form for clinical or farm visit bookings.</p>
+            </div>
+
+            <form id="bookingForm" class="grid sm:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formName">Full Name</label>
+                    <input type="text" id="fName" required placeholder="John Doe">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formPhone">Phone Number</label>
+                    <input type="tel" id="fPhone" required placeholder="9816440951">
+                </div>
+                <div class="sm:col-span-2 space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formAddress">Address</label>
+                    <input type="text" id="fAddress" required placeholder="Street Name, Ward No, Municipality">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formAnimal">Animal Type</label>
+                    <select id="fAnimal">
+                        <option value="Cow" data-t="optCow">Cow</option>
+                        <option value="Buffalo" data-t="optBuffalo">Buffalo</option>
+                        <option value="Goat" data-t="optGoat">Goat</option>
+                        <option value="Poultry" data-t="optPoultry">Poultry/Hen</option>
+                        <option value="Dog/Cat" data-t="optPet">Dog/Cat</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formUrgency">Urgency</label>
+                    <select id="fUrgency">
+                        <option value="Routine" data-t="optRoutine">Routine Checkup</option>
+                        <option value="Urgent" data-t="optUrgent">Urgent / Sick</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2 space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest" data-t="formProblem">Problem Description</label>
+                    <textarea id="fProblem" rows="4" required placeholder="Explain symptoms or reason for visit..."></textarea>
+                </div>
+                <div class="sm:col-span-2 pt-4">
+                    <button type="submit" id="submitBtn" class="w-full py-5 btn-primary rounded-2xl font-black text-lg shadow-lg flex items-center justify-center gap-3">
+                        <span id="btnText" data-t="btnSubmit">Confirm & Send via WhatsApp</span>
+                        <div id="btnSpinner" class="hidden"><i class="fas fa-circle-notch animate-spin"></i></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-20 px-6">
+        <div class="max-w-7xl mx-auto text-center sm:text-left grid lg:grid-cols-3 gap-12">
+            <div>
+                <div class="flex items-center justify-center sm:justify-start gap-2 mb-6">
+                    <i class="fas fa-hand-holding-medical text-emerald-400 text-2xl"></i>
+                    <span class="font-black text-xl uppercase">Mausam <span class="text-emerald-400">Agro-Vet</span></span>
+                </div>
+                <p class="text-slate-400" data-t="footAbout">Professional veterinary care for your livestock in Suryapura, Rupandehi.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-emerald-400 mb-4 text-xs uppercase tracking-widest">Contact</h4>
+                <p class="text-slate-400">+977-9816440951</p>
+                <p class="text-slate-400">Gaidahawa 08, Suryapura</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-emerald-400 mb-4 text-xs uppercase tracking-widest">Opening Hours</h4>
+                <p class="text-slate-400">7:00 AM - 8:00 PM</p>
+                <p class="text-red-400 font-bold mt-2 text-sm">24/7 Emergency Support</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/9779816440951" class="floating-wa fixed bottom-8 right-8 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center text-3xl shadow-xl z-[999]">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        const i18n = {
+            en: {
+                navHome: "Home", navDiseases: "Alerts", navBooking: "Booking", navServices: "Services",
+                btnCall: "Call Now", langSwitch: "नेपाली", langMobile: "नेपालीमा", btnClose: "Close",
+                heroBadge: "Veterinary Excellence in Nepal", heroTitle1: "Advanced Care for", heroTitle2: "Modern Farming",
+                heroSubtext: "Providing top-tier clinical services for your livestock. From rapid disease diagnosis to surgical care, we ensure your farm stays productive.",
+                btnBooking: "Book Now", heroExp: "Years Excellence",
+                disSection1: "Emergency", disSection2: "Disease Alerts", disSubtext: "Active monitoring for Rupandehi and Lumbini province.",
+                bookTitle1: "Schedule", bookTitle2: "Consultation", bookSubtext: "Fill the form for clinical or farm visit bookings.",
+                formName: "Full Name", formPhone: "Phone Number", formAddress: "Address", formAnimal: "Animal Type", formUrgency: "Urgency", formProblem: "Problem Description",
+                optCow: "Cow", optBuffalo: "Buffalo", optGoat: "Goat", optPoultry: "Poultry/Hen", optPet: "Dog/Cat",
+                optRoutine: "Routine Checkup", optUrgent: "Urgent / Sick", btnSubmit: "Confirm & Send via WhatsApp",
+                servTitle1: "Our Specialized Services",
+                serv1: "Clinical Care", serv2: "Vaccination", serv3: "Vet Pharmacy", serv4: "Lab Diagnosis",
+                footAbout: "Professional veterinary care for your livestock in Suryapura, Rupandehi."
+            },
+            np: {
+                navHome: "होम", navDiseases: "अलर्ट", navBooking: "बुकिङ", navServices: "सेवा",
+                btnCall: "कल गर्नुहोस्", langSwitch: "English", langMobile: "English", btnClose: "बन्द",
+                heroBadge: "नेपालको उत्कृष्ट सेवा", heroTitle1: "आधुनिक पशुपालनको लागि", heroTitle2: "विशेष उपचार",
+                heroSubtext: "तपाईंको पशुधनको लागि उच्च स्तरीय क्लिनिकल सेवाहरू। रोग निदान देखि शल्यक्रिया सम्म, हामी तपाईंको फार्म स्वस्थ राख्छौं।",
+                btnBooking: "बुकिङ गर्नुहोस्", heroExp: "वर्षको अनुभव",
+                disSection1: "आपतकालीन", disSection2: "रोग अलर्ट", disSubtext: "रूपन्देही र लुम्बिनी प्रदेशको लागि सक्रिय निगरानी।",
+                bookTitle1: "जाँच", bookTitle2: "बुकिङ गर्नुहोस्", bookSubtext: "क्लिनिकल वा फार्म भ्रमणको लागि फारम भर्नुहोस्।",
+                formName: "पूरा नाम", formPhone: "फोन नम्बर", formAddress: "ठेगाना", formAnimal: "पशुको प्रकार", formUrgency: "अवस्था", formProblem: "समस्याको विवरण",
+                optCow: "गाई", optBuffalo: "भैंसी", optGoat: "बाख्रा", optPoultry: "कुखुरा", optPet: "कुकुर/बिरालो",
+                optRoutine: "नियमित जाँच", optUrgent: "गम्भीर / बिरामी", btnSubmit: "व्हाट्सएप मार्फत पठाउनुहोस्",
+                servTitle1: "हाम्रा सेवाहरू",
+                serv1: "उपचार", serv2: "खोप", serv3: "औषधि", serv4: "ल्याब",
+                footAbout: "सुर्यपुरा, रूपन्देहीमा पशु स्वास्थ्यको लागि भरपर्दो केन्द्र।"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'np' : 'en';
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const data = i18n[currentLang];
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                if (data[key]) el.textContent = data[key];
+            });
+            document.getElementById('langLabel').textContent = data.langSwitch;
+            document.getElementById('langLabelMobile').textContent = data.langMobile;
+            
+            // Update placeholders
+            document.getElementById('fName').placeholder = data.formName;
+            document.getElementById('fPhone').placeholder = data.formPhone;
+            document.getElementById('fAddress').placeholder = data.formAddress;
+            document.getElementById('fProblem').placeholder = data.formProblem;
+
+            loadDiseases();
+        }
+
+        function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+        function openConfirm() { document.getElementById('confirmModal').classList.add('open'); }
+        function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); }
+
+        function loadDiseases() {
+            const grid = document.getElementById('diseaseGrid');
+            const data = [
+                { title: currentLang === 'en' ? 'FMD Outbreak' : 'खोरेत महामारी', desc: currentLang === 'en' ? 'Contagious viral disease in local cattle.' : 'स्थानीय गाईवस्तुमा सर्ने भाइरल रोग।' },
+                { title: currentLang === 'en' ? 'Lumpy Skin' : 'लम्पी स्किन', desc: currentLang === 'en' ? 'Buffaloes under risk in Gaidahawa area.' : 'गैडहवा क्षेत्रका भैंसीहरु जोखिममा।' },
+                { title: currentLang === 'en' ? 'PPR Warning' : 'पीपीआर चेतावनी', desc: currentLang === 'en' ? 'Mandatory goat vaccination season.' : 'बाख्राको खोप लगाउने समय।' }
+            ];
+            grid.innerHTML = data.map(d => `
+                <div class="white-card p-8 border-l-8 border-red-500">
+                    <h3 class="text-xl font-bold mb-2">${d.title}</h3>
+                    <p class="text-slate-500 text-sm mb-4">${d.desc}</p>
+                    <span class="text-red-600 font-bold text-xs uppercase tracking-widest">Active Alert</span>
+                </div>
+            `).join('');
+        }
+
+        // Form Submission Handling
+        const bookingForm = document.getElementById('bookingForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const finalSubmitBtn = document.getElementById('finalSubmitBtn');
+
+        let pendingData = null;
+
+        bookingForm.onsubmit = function(e) {
+            e.preventDefault();
+            
+            pendingData = {
+                name: document.getElementById('fName').value,
+                phone: document.getElementById('fPhone').value,
+                address: document.getElementById('fAddress').value,
+                animal: document.getElementById('fAnimal').value,
+                urgency: document.getElementById('fUrgency').value,
+                problem: document.getElementById('fProblem').value
+            };
+
+            openConfirm();
+        };
+
+        finalSubmitBtn.onclick = function() {
+            closeConfirm();
+            
+            // Show loading
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.classList.remove('hidden');
+
+            const waNumber = "9779816440951";
+            const message = `*NEW VET BOOKING*%0A%0A` +
+                            `*Farmer:* ${pendingData.name}%0A` +
+                            `*Phone:* ${pendingData.phone}%0A` +
+                            `*Address:* ${pendingData.address}%0A` +
+                            `*Animal:* ${pendingData.animal}%0A` +
+                            `*Urgency:* ${pendingData.urgency.toUpperCase()}%0A%0A` +
+                            `*Problem:*%0A${pendingData.problem}`;
+
+            setTimeout(() => {
+                window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
+                
+                // Reset UI
+                bookingForm.reset();
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.classList.add('hidden');
+                pendingData = null;
+            }, 1000);
+        };
+
+        window.onload = applyTranslations;
+    </script>
+</body>
+</html>
